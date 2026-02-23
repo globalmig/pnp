@@ -8,6 +8,14 @@ import { motion, Variants } from "framer-motion";
 import ScrollIndicator from "@/components/common/ScrollIndicator";
 
 export default function page() {
+  const handleScrollToConsulting = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    document.getElementById("startup-consulting")?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+    window.history.replaceState(null, "", "#startup-consulting");
+  };
   // 애니메이션 variants
   const fadeInUp: Variants = {
     hidden: { opacity: 0, y: 60 },
@@ -73,7 +81,11 @@ export default function page() {
             </motion.p>
 
             <motion.div variants={fadeInUp}>
-              <Link href="/" className="border-white hover:border-[#F93333] border py-2 px-20 rounded-md inline-flex items-center gap-2 font-medium text-white hover:bg-[#F93333] transition mt-12">
+              <Link
+                href="#startup-consulting"
+                onClick={handleScrollToConsulting}
+                className="border-white hover:border-[#F93333] border py-2 px-20 rounded-md inline-flex items-center gap-2 font-medium text-white hover:bg-[#F93333] transition mt-12"
+              >
                 문의하기
                 <span aria-hidden="true" className="text-[#F93333]">
                   &gt;
@@ -216,7 +228,7 @@ export default function page() {
           </motion.div>
         </div>
       </section>
-      <section>
+      <section id="startup-consulting">
         <Contact />
       </section>
     </>
