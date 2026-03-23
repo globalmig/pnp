@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import Hero2 from "@/components/common/Hero2";
 import Image from "next/image";
 import Contact from "@/components/common/Contact";
+import StartupCostSection from "@/components/common/StartupCostSection";
 import { motion, Variants } from "framer-motion";
 
 type BrandKey = "octopus" | "goat";
@@ -122,6 +123,9 @@ function OctopusContent() {
       {/* 본사 혜택 카드 */}
       <BenefitsCards type="octopus" />
 
+      {/* 창업 비용 */}
+      <StartupCostSection />
+
       {/* 비디오 */}
       <motion.div className="w-full" initial={{ opacity: 0, y: 18 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.25 }} transition={{ duration: 0.7, ease: "easeOut" }}>
         <video src="/videos/brand01.mp4" controls autoPlay loop muted playsInline className="w-full h-auto" aria-label="마시마니 문어&전복갈비찜 소개 영상" />
@@ -177,6 +181,9 @@ function GoatContent() {
 
       {/* 본사 혜택 카드 */}
       <BenefitsCards type="goat" />
+
+      {/* 창업 비용 */}
+      <StartupCostSection />
 
       {/* 비디오 */}
       <motion.div

@@ -4,6 +4,7 @@ import Link from "next/link";
 import React from "react";
 import Image from "next/image";
 import Contact from "@/components/common/Contact";
+import StartupCostSection from "@/components/common/StartupCostSection";
 import { motion, Variants } from "framer-motion";
 import ScrollIndicator from "@/components/common/ScrollIndicator";
 
@@ -67,15 +68,19 @@ export default function page() {
       <section className="bg-[url('/images/hero_bg2.png')] bg-cover bg-center bg-no-repeat">
         <div className="w-full max-w-[1440px] mx-auto relative h-[640px] md:h-[800px]">
           <motion.div className="absolute right-10 top-[180px] -translate-y-1/2" initial="hidden" animate="visible" variants={slideInRight}>
-            <Image src="/images/main_logo.png" alt="문어전복갈비찜로고" width={480} height={480} className="hidden md:block" />
+            <div className="flex gap-10 mt-32">
+              <Image src="/images/logo_01.png" alt="문어전복갈비찜로고" width={280} height={280} className="hidden md:block" />
+              <Image src="/images/logo_02.png" alt="흑염소로고" width={280} height={280} className="hidden md:block" />
+            </div>
           </motion.div>
 
           <motion.div className="main-text text-center md:text-start pt-44 md:p-0 px-4 md:absolute md:top-60 md:left-10" initial="hidden" animate="visible" variants={staggerContainer}>
-            <motion.h2 className="text-white font-bold text-[40px] md:text-[80px] lg:text-[100px]" variants={fadeInUp}>
-              월 <span className="text-[#F93333] pr-2">매출 1억</span>달성
+            <motion.h2 className="text-white font-bold text-[40px] md:text-[80px] lg:text-[90px]" variants={fadeInUp}>
+              <span className="text-[#F93333] pr-2">간판만 </span>바꿨을뿐인데?
             </motion.h2>
 
             <motion.p className="text-white font-bold text-4xl lg:text-5xl mt-16 md:mt-24 break-keep" variants={fadeInUp}>
+              <span className="text-[#F93333]">월 1억 달성</span> <br />
               <span className="text-[#F93333]">월 매출 200%</span>
               <br />맛 100% 보장 브랜드
             </motion.p>
@@ -227,6 +232,9 @@ export default function page() {
             </motion.div>
           </motion.div>
         </div>
+      </section>
+      <section>
+        <StartupCostSection />
       </section>
       <section id="startup-consulting">
         <Contact />

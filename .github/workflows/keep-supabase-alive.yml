@@ -1,0 +1,16 @@
+name: Keep Supabase Alive
+
+on:
+  schedule:
+    # 3일마다 실행 (UTC 기준 00:00) — Supabase 무료는 7일 미사용 시 pause
+    - cron: "0 0 */3 * *"
+  workflow_dispatch: # 수동 실행 가능
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Supabase
+        run: |
+          curl -s -o /dev/null -w "%{http_code}" https://fihlowquevrcxvjifskp.supabase.co
+          echo "Supabase ping 완료"
