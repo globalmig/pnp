@@ -11,8 +11,8 @@ import { motion, Variants } from "framer-motion";
 type BrandKey = "octopus" | "goat";
 
 const tabs: { key: BrandKey; label: string }[] = [
-  { key: "octopus", label: "마시마니 문어&전복갈비찜전문점" },
-  { key: "goat", label: "마시마니 흑염소요리전문점" },
+  { key: "goat", label: "마시마니 황칠 흑염소 전문점" },
+  { key: "octopus", label: "마시마니 김치찜&갈비찜 전문" },
 ];
 
 function cn(...classes: (string | false | null | undefined)[]) {
@@ -94,7 +94,7 @@ function OctopusContent() {
           viewport={{ once: true, amount: 0.35 }}
         >
           <motion.div variants={fadeRight} className="relative w-[200px] h-[200px] md:w-[300px] md:h-[300px]">
-            <Image src="/images/logo_01.png" alt="문어전복갈비찜로고" fill className="object-contain" priority />
+            <Image src="/images/logo_03.png" alt="마시마니 김치찜&갈비찜 전문 로고" fill className="object-contain" priority />
           </motion.div>
 
           <motion.div variants={fadeUp} className="flex flex-col text-center md:text-left">
@@ -128,7 +128,7 @@ function OctopusContent() {
 
       {/* 비디오 */}
       <motion.div className="w-full" initial={{ opacity: 0, y: 18 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.25 }} transition={{ duration: 0.7, ease: "easeOut" }}>
-        <video src="/videos/brand01.mp4" controls autoPlay loop muted playsInline className="w-full h-auto" aria-label="마시마니 문어&전복갈비찜 소개 영상" />
+        <video src="/videos/brand01.mp4" controls autoPlay loop muted playsInline className="w-full h-auto" aria-label="마시마니 김치찜&갈비찜 전문 소개 영상" />
       </motion.div>
 
       <motion.div initial={{ opacity: 0, y: 18 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.15 }} transition={{ duration: 0.7, ease: "easeOut" }}>
@@ -152,7 +152,7 @@ function GoatContent() {
           viewport={{ once: true, amount: 0.35 }}
         >
           <motion.div variants={fadeRight} className="relative w-[200px] h-[200px] md:w-[300px] md:h-[300px]">
-            <Image src="/images/logo_02.png" alt="마시마니흑염소로고" fill className="object-contain" priority />
+            <Image src="/images/logo_04.png" alt="마시마니흑염소로고" fill className="object-contain" priority />
           </motion.div>
 
           <motion.div variants={fadeUp} className="flex flex-col text-center md:text-left">
