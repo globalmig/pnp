@@ -94,11 +94,6 @@ export default function BoardDetailPage() {
         {/* 하단 구분선 */}
         <div className="border-t border-gray-300 mb-10"></div>
 
-        {/* 내용 */}
-        <div className="mb-12">
-          <p className="text-gray-800 whitespace-pre-wrap leading-relaxed">{notice.description}</p>
-        </div>
-
         {/* 이미지들 */}
         {notice.image_links && notice.image_links.length > 0 && (
           <div className="space-y-8 mb-12">
@@ -111,6 +106,11 @@ export default function BoardDetailPage() {
             ))}
           </div>
         )}
+
+        {/* 내용 */}
+        <div className="mb-12">
+          <p className="text-gray-800 whitespace-pre-wrap leading-relaxed">{notice.description}</p>
+        </div>
 
         {/* 하단 구분선 */}
         <div className="border-t border-gray-300 mb-8"></div>

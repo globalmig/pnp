@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Hero2 from "@/components/common/Hero2";
 import Image from "next/image";
@@ -30,7 +30,7 @@ export default function BoardListPage() {
       const response = await fetch("/api/admin/notices");
       if (response.ok) {
         const data = await response.json();
-        setNotices(data);
+        setNotices(data as Notice[]);
       } else {
         console.error("공지사항을 불러오는데 실패했습니다.");
       }
@@ -106,7 +106,6 @@ export default function BoardListPage() {
               {/* 바디 */}
               <tbody>
                 {currentNotices.map((notice, index) => {
-                  const displayNumber = notices.length - (startIndex + index);
                   return (
                     <tr
                       key={notice.id}
@@ -115,7 +114,7 @@ export default function BoardListPage() {
                     >
                       <td className="py-4 px-2 md:px-6 text-sm text-gray-900">
                         <div className="w-8 h-8 md:w-10 md:h-10 relative">
-                          <Image src={"/images/logo.png"} alt="마시마니로고" fill className="object-contain" />
+                          <Image src={"/images/logo.png"} alt="마시마니로고" fill sizes="40px" className="object-contain" />
                         </div>
                       </td>
                       <td className="py-4 px-2 md:px-6 text-sm text-center text-gray-900 truncate max-w-0">{notice.title}</td>
