@@ -21,7 +21,7 @@ export default function Page() {
   const router = useRouter();
   const params = useParams<{ brand?: string }>();
 
-  const brand = (params.brand as BrandKey) ?? "octopus";
+  const brand = (params.brand as BrandKey) ?? "goat";
 
   function onClickTab(next: BrandKey) {
     router.push(`/menu/${next}`);
