@@ -1,7 +1,13 @@
+"use client";
+
 import Link from "next/link";
 import React from "react";
+import { usePathname } from "next/navigation";
 
 export default function Footer() {
+  const pathname = usePathname();
+  if (pathname.startsWith("/admin")) return null;
+
   return (
     <footer className="bg-[#0e0e0e] text-white/80 flex flex-col items-center mx-auto py-20 gap-6">
       <div className="text-start">

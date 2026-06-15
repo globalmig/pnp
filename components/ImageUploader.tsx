@@ -66,20 +66,17 @@ export default function ImageUploader({ images, onImagesChange, maxImages = 10 }
 
     const imageUrl = images[index];
 
-    // URL에서 파일명 추출
-    try {
-      const url = new URL(imageUrl);
-      const pathParts = url.pathname.split("/");
-      const fileName = pathParts[pathParts.length - 1];
-
-      // 서버에서 이미지 삭제
-      await fetch("/api/admin/upload", {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ fileName }),
-      });
-    } catch (error) {
-      console.error("Delete error:", error);
+    const fileName = imageUrl.split("/").pop();
+    if (fileName) {
+      try {
+        await fetch("/api/admin/upload", {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ fileName }),
+        });
+      } catch (error) {
+        console.error("Delete error:", error);
+      }
     }
 
     // 목록에서 제거

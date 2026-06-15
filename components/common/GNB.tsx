@@ -34,8 +34,10 @@ export default function GNB() {
 
   const close = () => setOpen(false);
 
+  if (isAdmin) return null;
+
   return (
-    <header className={["top-0 left-0 w-full z-50", isAdmin ? "fixed bg-black" : "absolute bg-transparent"].join(" ")}>
+    <header className="absolute top-0 left-0 w-full z-50 bg-transparent">
       <nav className="w-full">
         <div className="flex justify-between items-center w-full max-w-[1440px] mx-auto text-xl h-24 px-4">
           {/* 로고 */}
