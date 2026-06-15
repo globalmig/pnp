@@ -32,7 +32,7 @@ export default function BoardDetailPage() {
     try {
       const response = await fetch(`/api/admin/notices/${id}`);
       if (response.ok) {
-        const data = await response.json();
+        const data = await response.json() as Notice;
         setNotice(data);
       } else {
         console.error("공지사항을 불러오는데 실패했습니다.");

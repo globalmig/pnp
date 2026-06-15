@@ -43,7 +43,7 @@ export default function LocationPage() {
     try {
       const response = await fetch("/api/admin/branches");
       if (response.ok) {
-        const data = await response.json();
+        const data = await response.json() as Branch[];
         setBranches(data);
       } else {
         console.error("지점 정보를 불러오는데 실패했습니다.");

@@ -61,7 +61,7 @@ export async function DELETE(request: NextRequest) {
   }
 
   try {
-    const { fileName } = await request.json();
+    const { fileName } = await request.json() as { fileName: string };
 
     if (!fileName) {
       return NextResponse.json({ error: "파일명이 필요합니다." }, { status: 400 });

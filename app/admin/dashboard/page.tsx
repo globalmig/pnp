@@ -115,16 +115,16 @@ export default function AdminDashboard() {
     setModalLoading(true);
     try {
       const res = await fetch(`/api/admin/${activeTab}/${id}`);
-      const data = await res.json();
+      const data = await res.json() as Record<string, unknown>;
       setFormData({
-        title: data.title || "",
-        description: data.description || "",
-        posted_at: data.posted_at || "",
-        name: data.name || "",
-        location: data.location || "",
-        phone: data.phone || "",
-        map_link: data.map_link || "",
-        image_links: data.image_links || [],
+        title: (data.title as string) || "",
+        description: (data.description as string) || "",
+        posted_at: (data.posted_at as string) || "",
+        name: (data.name as string) || "",
+        location: (data.location as string) || "",
+        phone: (data.phone as string) || "",
+        map_link: (data.map_link as string) || "",
+        image_links: (data.image_links as string[]) || [],
       });
     } catch {
       alert("데이터를 불러오는데 실패했습니다.");

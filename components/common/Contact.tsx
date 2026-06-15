@@ -56,7 +56,7 @@ export default function SalesConsultationLayout() {
         }),
       });
 
-      const j = await res.json().catch(() => null);
+      const j = await res.json().catch(() => null) as { error?: string } | null;
 
       if (!res.ok) {
         alert(j?.error || "전송 실패");

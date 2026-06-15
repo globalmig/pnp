@@ -3,7 +3,7 @@ import crypto from "crypto";
 
 export async function POST(req: Request) {
   try {
-    const { name, phone, message } = await req.json();
+    const { name, phone, message } = await req.json() as { name: string; phone: string; message: string };
 
     if (!name || !phone || !message) {
       return NextResponse.json({ error: "필수값 누락" }, { status: 400 });
@@ -41,7 +41,7 @@ export async function POST(req: Request) {
       }),
     });
 
-    const data = await res.json();
+    const data = await res.json() as { error?: string };
 
     if (!res.ok) {
       return NextResponse.json({ error: data?.error || "SMS 전송 실패", raw: data }, { status: 500 });

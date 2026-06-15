@@ -30,17 +30,17 @@ export default function EditPage() {
   const fetchData = async () => {
     try {
       const response = await fetch(`/api/admin/${type}/${id}`);
-      const data = await response.json();
+      const data = await response.json() as Record<string, unknown>;
 
       setFormData({
-        title: data.title || "",
-        description: data.description || "",
-        posted_at: data.posted_at || "",
-        name: data.name || "",
-        location: data.location || "",
-        phone: data.phone || "",
-        map_link: data.map_link || "",
-        image_links: data.image_links || [],
+        title: (data.title as string) || "",
+        description: (data.description as string) || "",
+        posted_at: (data.posted_at as string) || "",
+        name: (data.name as string) || "",
+        location: (data.location as string) || "",
+        phone: (data.phone as string) || "",
+        map_link: (data.map_link as string) || "",
+        image_links: (data.image_links as string[]) || [],
       });
     } catch (error) {
       alert("데이터를 불러오는데 실패했습니다.");

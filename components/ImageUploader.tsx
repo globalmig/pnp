@@ -39,15 +39,16 @@ export default function ImageUploader({ images, onImagesChange, maxImages = 10 }
         });
 
         if (!response.ok) {
-          const error = await response.json();
+          const error = await response.json() as { error?: string };
           throw new Error(error.error || "업로드 실패");
         }
 
-        const data = await response.json();
+        const data = await response.json() as { url: string };
         uploadedUrls.push(data.url);
       } catch (error) {
-        console.error("Upload error:", error);
-        alert(`${file.name} 업로드 실패: ${error}`);
+        const msg = error instanceof Error ? error.message : String(error);
+        console.error("Upload error:", msg);
+        alert(`${file.name} 업로드 실패: ${msg}`);
       }
     }
 

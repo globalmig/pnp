@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const body = await request.json();
+    const body = await request.json() as { title?: string; description?: string; posted_at?: string; image_links?: unknown[] };
     const { title, description, posted_at, image_links } = body;
 
     if (!title || !description || !posted_at) {

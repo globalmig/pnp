@@ -5,7 +5,7 @@ const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "admin123"; // 환경변수
 
 export async function POST(request: NextRequest) {
   try {
-    const { password } = await request.json();
+    const { password } = await request.json() as { password: string };
 
     if (password === ADMIN_PASSWORD) {
       // 쿠키에 세션 토큰 저장

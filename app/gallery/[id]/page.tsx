@@ -31,7 +31,7 @@ export default function GalleryDetailPage() {
     try {
       const response = await fetch(`/api/admin/gallery/${id}`);
       if (response.ok) {
-        const data = await response.json();
+        const data = await response.json() as Gallery;
         setGallery(data);
       } else {
         console.error("갤러리를 불러오는데 실패했습니다.");

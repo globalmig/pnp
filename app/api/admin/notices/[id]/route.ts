@@ -42,7 +42,7 @@ export async function PUT(request: NextRequest, context: Ctx) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const body = await request.json();
+  const body = await request.json() as { title?: string; description?: string; posted_at?: string; image_links?: unknown[] };
   const { title, description, posted_at, image_links } = body;
   const now = new Date().toISOString();
 
