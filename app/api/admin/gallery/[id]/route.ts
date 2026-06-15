@@ -1,63 +1,75 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
+import { getEnv } from "@/lib/cf-env";
+import { r2Delete } from "@/lib/r2";
 import { cookies } from "next/headers";
 
-const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
+type GalleryRow = {
+  id: string;
+  title: string;
+  image_links: string;
+  created_at: string;
+  updated_at: string;
+};
+
+type Ctx = { params: Promise<{ id: string }> };
 
 async function checkAuth() {
   const session = (await cookies()).get("admin_session");
   return session?.value === "authenticated";
 }
 
-type Ctx = { params: Promise<{ id: string }> };
-
 export async function GET(request: NextRequest, context: Ctx) {
   const { id } = await context.params;
 
-  // if (!checkAuth()) {
-  //   return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  // }
+  const env = await getEnv();
+  const row = (await env.DB.prepare("SELECT * FROM gallery WHERE id = ?").bind(id).first()) as GalleryRow | null;
 
-  const { data, error } = await supabase.from("gallery").select("*").eq("id", id).single();
-
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  if (!row) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
-  return NextResponse.json(data);
+  return NextResponse.json({ ...row, image_links: JSON.parse(row.image_links || "[]") });
 }
 
 export async function PUT(request: NextRequest, context: Ctx) {
   const { id } = await context.params;
-
-  if (!checkAuth()) {
+  if (!(await checkAuth())) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const body = await request.json();
+  const body = await request.json() as { title?: string; image_links?: unknown[] };
   const { title, image_links } = body;
+  const now = new Date().toISOString();
 
-  const { data, error } = await supabase.from("gallery").update({ title, image_links }).eq("id", id).select().single();
+  const env = await getEnv();
+  await env.DB.prepare("UPDATE gallery SET title = ?, image_links = ?, updated_at = ? WHERE id = ?")
+    .bind(title, JSON.stringify(Array.isArray(image_links) ? image_links : []), now, id)
+    .run();
 
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
-  }
-
-  return NextResponse.json(data);
+  const row = (await env.DB.prepare("SELECT * FROM gallery WHERE id = ?").bind(id).first()) as GalleryRow;
+  return NextResponse.json({ ...row, image_links: JSON.parse(row.image_links || "[]") });
 }
 
 export async function DELETE(request: NextRequest, context: Ctx) {
   const { id } = await context.params;
-
-  if (!checkAuth()) {
+  if (!(await checkAuth())) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { error } = await supabase.from("gallery").delete().eq("id", id);
+  const env = await getEnv();
 
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  const row = (await env.DB.prepare("SELECT image_links FROM gallery WHERE id = ?").bind(id).first()) as { image_links: string } | null;
+  if (row) {
+    const imageLinks: string[] = JSON.parse(row.image_links || "[]");
+    await Promise.all(
+      imageLinks.map((url) => {
+        const fileName = url.split("/").pop();
+        return fileName ? r2Delete(fileName, env) : Promise.resolve();
+      })
+    );
   }
+
+  await env.DB.prepare("DELETE FROM gallery WHERE id = ?").bind(id).run();
 
   return NextResponse.json({ success: true });
 }

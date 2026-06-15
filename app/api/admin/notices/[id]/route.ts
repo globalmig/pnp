@@ -1,8 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
+import { getEnv } from "@/lib/cf-env";
+import { r2Delete } from "@/lib/r2";
 import { cookies } from "next/headers";
 
-const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
+type NoticeRow = {
+  id: string;
+  title: string;
+  description: string;
+  posted_at: string;
+  image_links: string;
+  created_at: string;
+  updated_at: string;
+};
 
 type Ctx = { params: Promise<{ id: string }> };
 
@@ -11,53 +20,63 @@ async function checkAuth() {
   return session?.value === "authenticated";
 }
 
-// GET: 단일 항목 조회
 export async function GET(request: NextRequest, context: Ctx) {
   const { id } = await context.params;
-  if (!checkAuth()) {
+  if (!(await checkAuth())) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { data, error } = await supabase.from("notices").select("*").eq("id", id).single();
+  const env = await getEnv();
+  const row = (await env.DB.prepare("SELECT * FROM notices WHERE id = ?").bind(id).first()) as NoticeRow | null;
 
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  if (!row) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
-  return NextResponse.json(data);
+  return NextResponse.json({ ...row, image_links: JSON.parse(row.image_links || "[]") });
 }
 
-// PUT: 항목 수정
 export async function PUT(request: NextRequest, context: Ctx) {
   const { id } = await context.params;
-  if (!checkAuth()) {
+  if (!(await checkAuth())) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   const body = await request.json();
   const { title, description, posted_at, image_links } = body;
+  const now = new Date().toISOString();
 
-  const { data, error } = await supabase.from("notices").update({ title, description, posted_at, image_links }).eq("id", id).select().single();
+  const env = await getEnv();
+  await env.DB.prepare(
+    "UPDATE notices SET title = ?, description = ?, posted_at = ?, image_links = ?, updated_at = ? WHERE id = ?"
+  )
+    .bind(title, description, posted_at, JSON.stringify(Array.isArray(image_links) ? image_links : []), now, id)
+    .run();
 
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
-  }
-
-  return NextResponse.json(data);
+  const row = (await env.DB.prepare("SELECT * FROM notices WHERE id = ?").bind(id).first()) as NoticeRow;
+  return NextResponse.json({ ...row, image_links: JSON.parse(row.image_links || "[]") });
 }
 
-// DELETE: 항목 삭제
 export async function DELETE(request: NextRequest, context: Ctx) {
   const { id } = await context.params;
-  if (!checkAuth()) {
+  if (!(await checkAuth())) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { error } = await supabase.from("notices").delete().eq("id", id);
+  const env = await getEnv();
 
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  const row = (await env.DB.prepare("SELECT image_links FROM notices WHERE id = ?").bind(id).first()) as { image_links: string } | null;
+  if (row) {
+    const imageLinks: string[] = JSON.parse(row.image_links || "[]");
+    await Promise.all(
+      imageLinks.map((url) => {
+        const fileName = url.split("/").pop();
+        return fileName ? r2Delete(fileName, env) : Promise.resolve();
+      })
+    );
   }
+
+  await env.DB.prepare("DELETE FROM notices WHERE id = ?").bind(id).run();
 
   return NextResponse.json({ success: true });
 }

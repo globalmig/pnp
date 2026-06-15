@@ -1,28 +1,28 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
+import { getEnv } from "@/lib/cf-env";
 import { cookies } from "next/headers";
 
-const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
+type GalleryRow = {
+  id: string;
+  title: string;
+  image_links: string;
+  created_at: string;
+  updated_at: string;
+};
 
 async function checkAuth() {
   const session = (await cookies()).get("admin_session");
   return session?.value === "authenticated";
 }
 
-// GET: 목록 조회
 export async function GET() {
-  // if (!checkAuth()) {
-  //   return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  // }
-
   try {
-    const { data, error } = await supabase.from("gallery").select("*").order("created_at", { ascending: false });
-
-    if (error) {
-      console.error("Supabase GET error:", error);
-      return NextResponse.json({ error: error.message }, { status: 500 });
-    }
-
+    const env = await getEnv();
+    const result = await env.DB.prepare("SELECT * FROM gallery ORDER BY created_at DESC").all();
+    const data = (result.results as GalleryRow[]).map((row) => ({
+      ...row,
+      image_links: JSON.parse(row.image_links || "[]"),
+    }));
     return NextResponse.json(data);
   } catch (error) {
     console.error("GET error:", error);
@@ -30,38 +30,41 @@ export async function GET() {
   }
 }
 
-// POST: 새 항목 생성
-// POST: 새 항목 생성
 export async function POST(request: NextRequest) {
-  if (!checkAuth()) {
+  if (!(await checkAuth())) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   try {
-    const body = await request.json();
+    const body = (await request.json()) as Record<string, unknown>;
     const title = String(body?.title ?? "").trim();
-
-    // ✅ image_links: string | string[] | {url}[] 등 뭐가 와도 string[]로 정리
     const raw = body?.image_links ?? body?.image_link ?? body?.image ?? body?.images;
-
-    const image_links: string[] = Array.isArray(raw) ? raw.map((v) => (typeof v === "string" ? v : v?.url)).filter(Boolean) : typeof raw === "string" ? [raw] : [];
+    const image_links: string[] = Array.isArray(raw)
+      ? raw.map((v) => (typeof v === "string" ? v : v?.url)).filter(Boolean)
+      : typeof raw === "string"
+      ? [raw]
+      : [];
 
     if (!title) {
       return NextResponse.json({ error: "title is required" }, { status: 400 });
     }
 
-    // ✅ “없어도 되는” 정책이면 아래를 주석 처리하고, 허용 정책이면 유지
     if (image_links.length === 0) {
       return NextResponse.json({ error: "At least one image is required" }, { status: 400 });
     }
 
-    const { data, error } = await supabase.from("gallery").insert({ title, image_links }).select().single();
+    const env = await getEnv();
+    const id = crypto.randomUUID();
+    const now = new Date().toISOString();
 
-    if (error) {
-      return NextResponse.json({ error: error.message, details: error }, { status: 500 });
-    }
+    await env.DB.prepare(
+      "INSERT INTO gallery (id, title, image_links, created_at, updated_at) VALUES (?, ?, ?, ?, ?)"
+    )
+      .bind(id, title, JSON.stringify(image_links), now, now)
+      .run();
 
-    return NextResponse.json(data);
+    const row = (await env.DB.prepare("SELECT * FROM gallery WHERE id = ?").bind(id).first()) as GalleryRow;
+    return NextResponse.json({ ...row, image_links: JSON.parse(row.image_links || "[]") });
   } catch (error) {
     return NextResponse.json({ error: "Server error", details: String(error) }, { status: 500 });
   }

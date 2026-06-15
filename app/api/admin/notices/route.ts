@@ -1,28 +1,30 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
+import { getEnv } from "@/lib/cf-env";
 import { cookies } from "next/headers";
 
-const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
+type NoticeRow = {
+  id: string;
+  title: string;
+  description: string;
+  posted_at: string;
+  image_links: string;
+  created_at: string;
+  updated_at: string;
+};
 
 async function checkAuth() {
   const session = (await cookies()).get("admin_session");
   return session?.value === "authenticated";
 }
 
-// GET: 목록 조회
 export async function GET() {
-  // if (!checkAuth()) {
-  //   return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  // }
-
   try {
-    const { data, error } = await supabase.from("notices").select("*").order("posted_at", { ascending: false });
-
-    if (error) {
-      console.error("Supabase GET error:", error);
-      return NextResponse.json({ error: error.message }, { status: 500 });
-    }
-
+    const env = await getEnv();
+    const result = await env.DB.prepare("SELECT * FROM notices ORDER BY posted_at DESC").all();
+    const data = (result.results as NoticeRow[]).map((row) => ({
+      ...row,
+      image_links: JSON.parse(row.image_links || "[]"),
+    }));
     return NextResponse.json(data);
   } catch (error) {
     console.error("GET error:", error);
@@ -30,42 +32,32 @@ export async function GET() {
   }
 }
 
-// POST: 새 항목 생성
 export async function POST(request: NextRequest) {
-  if (!checkAuth()) {
+  if (!(await checkAuth())) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   try {
     const body = await request.json();
-    console.log("Received body:", body);
-
     const { title, description, posted_at, image_links } = body;
 
-    // 유효성 검사
     if (!title || !description || !posted_at) {
       return NextResponse.json({ error: "title, description, posted_at are required" }, { status: 400 });
     }
 
-    // 데이터 준비
-    const insertData = {
-      title,
-      description,
-      posted_at,
-      image_links: Array.isArray(image_links) ? image_links : [],
-    };
+    const env = await getEnv();
+    const id = crypto.randomUUID();
+    const now = new Date().toISOString();
+    const imageLinksJson = JSON.stringify(Array.isArray(image_links) ? image_links : []);
 
-    console.log("Insert data:", insertData);
+    await env.DB.prepare(
+      "INSERT INTO notices (id, title, description, posted_at, image_links, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)"
+    )
+      .bind(id, title, description, posted_at, imageLinksJson, now, now)
+      .run();
 
-    const { data, error } = await supabase.from("notices").insert(insertData).select().single();
-
-    if (error) {
-      console.error("Supabase INSERT error:", error);
-      return NextResponse.json({ error: error.message, details: error }, { status: 500 });
-    }
-
-    console.log("Insert success:", data);
-    return NextResponse.json(data);
+    const row = (await env.DB.prepare("SELECT * FROM notices WHERE id = ?").bind(id).first()) as NoticeRow;
+    return NextResponse.json({ ...row, image_links: JSON.parse(row.image_links || "[]") });
   } catch (error) {
     console.error("POST error:", error);
     return NextResponse.json({ error: "Server error", details: String(error) }, { status: 500 });
