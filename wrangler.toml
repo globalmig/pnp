@@ -1,0 +1,18 @@
+name = "pnpinc"
+main = ".open-next/worker.js"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
+
+assets = { directory = ".open-next/assets", binding = "ASSETS" }
+
+[vars]
+R2_PUBLIC_URL = "https://pub-2d4ea06a2b8a4d6e93aea884849d1597.r2.dev"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "pnpinc-db"
+database_id = "50d3f2ba-30ed-4c48-8ce5-e40e188f8a5a"
+
+[[r2_buckets]]
+binding = "R2_BUCKET"
+bucket_name = "pnpinc-images"
