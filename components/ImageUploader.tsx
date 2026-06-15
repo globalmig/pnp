@@ -5,10 +5,11 @@ import { useState, useRef } from "react";
 interface ImageUploaderProps {
   images: string[];
   onImagesChange: (images: string[]) => void;
+  onUploadingChange?: (uploading: boolean) => void;
   maxImages?: number;
 }
 
-export default function ImageUploader({ images, onImagesChange, maxImages = 10 }: ImageUploaderProps) {
+export default function ImageUploader({ images, onImagesChange, onUploadingChange, maxImages = 10 }: ImageUploaderProps) {
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<string>("");
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -23,6 +24,7 @@ export default function ImageUploader({ images, onImagesChange, maxImages = 10 }
     }
 
     setUploading(true);
+    onUploadingChange?.(true);
     const uploadedUrls: string[] = [];
 
     for (let i = 0; i < files.length; i++) {
@@ -54,6 +56,7 @@ export default function ImageUploader({ images, onImagesChange, maxImages = 10 }
 
     onImagesChange([...images, ...uploadedUrls]);
     setUploading(false);
+    onUploadingChange?.(false);
     setUploadProgress("");
 
     // 파일 입력 초기화

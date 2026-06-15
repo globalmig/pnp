@@ -57,6 +57,7 @@ export default function AdminDashboard() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [formData, setFormData] = useState(initialFormData);
   const [saving, setSaving] = useState(false);
+  const [imageUploading, setImageUploading] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -311,7 +312,7 @@ export default function AdminDashboard() {
                       <Field label="게시일">
                         <input type="date" required value={formData.posted_at} onChange={(e) => setFormData({ ...formData, posted_at: e.target.value })} className={inputClass} />
                       </Field>
-                      <ImageUploader images={formData.image_links} onImagesChange={(imgs) => setFormData({ ...formData, image_links: imgs })} maxImages={10} />
+                      <ImageUploader images={formData.image_links} onImagesChange={(imgs) => setFormData({ ...formData, image_links: imgs })} onUploadingChange={setImageUploading} maxImages={10} />
                     </>
                   )}
 
@@ -320,7 +321,7 @@ export default function AdminDashboard() {
                       <Field label="제목">
                         <input type="text" required value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} className={inputClass} placeholder="갤러리 제목" />
                       </Field>
-                      <ImageUploader images={formData.image_links} onImagesChange={(imgs) => setFormData({ ...formData, image_links: imgs })} maxImages={20} />
+                      <ImageUploader images={formData.image_links} onImagesChange={(imgs) => setFormData({ ...formData, image_links: imgs })} onUploadingChange={setImageUploading} maxImages={20} />
                     </>
                   )}
 
@@ -352,11 +353,11 @@ export default function AdminDashboard() {
               <button
                 type="submit"
                 form="modal-form"
-                disabled={saving || modalLoading}
+                disabled={saving || modalLoading || imageUploading}
                 className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 transition-colors"
               >
-                {saving && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
-                {saving ? "저장 중..." : "저장"}
+                {(saving || imageUploading) && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                {imageUploading ? "이미지 업로드 중..." : saving ? "저장 중..." : "저장"}
               </button>
             </div>
           </div>
